@@ -14,7 +14,7 @@ mqtt:
   # 
 
   # The first profile in the list is the primary (default) broker.
-  active_profiles: [local, hivemq_cloud]
+  active_profiles: [local]
 
   # Broker profiles.
   # Profile values override any common mqtt.* settings below.
@@ -54,6 +54,22 @@ mqtt:
 
   # Topic defaults (projects can change these)
   base_topic: "simulated-city"
+
+dating_simulation:
+  random_seed: 42
+  bar_size_m: 20.0
+  people_count: 50
+  bar_ids: ["bar_1", "bar_2", "bar_3", "bar_4"]
+  colors: ["red", "blue", "green", "orange", "purple"]
+  conversation_radius_m: 1.0
+  walk_step_max_m: 0.3
+  match_seconds: 10
+  exit_seconds: 20
+  simulation_seconds: 300
+  tick_seconds: 1.0
+  switch_interval_seconds: 50
+  switch_fraction: 0.25
+  bar_balance_tolerance: 5
 
 # EXAMPLE: To use multiple MQTT brokers simultaneously, uncomment and edit above.
 # Replace the single "profile: local" line with:

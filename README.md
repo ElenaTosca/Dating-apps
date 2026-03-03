@@ -1,205 +1,140 @@
-# simulated-city-template
 
-This is a template repository.
-
-Get started by reading [docs/setup.md](docs/setup.md).
-See [docs/overview.md](docs/overview.md) for an overview of the base module content.
-
-## Template for a project
-
-### Step 1: Define Your Simulation (Before Any Code)
-
-Use this template to describe your project. Think about these four components and the messages they send between each other:
-
-### My Smart City Project: [Project Name]
-
-#### 1. The Trigger (Who/What is moving?)
-Describe the **Agents** (Humans, Animals, Vehicles) and the **Surroundings** (Weather, Time).
-*Example: A citizen drops a pizza box into the smart-bin.*
-
-#### 2. The Observer (What does the city see?)
-What **Sensor** picks up the information? 
-*Example: An infrared sensor inside the bin detects the height of the trash.*
-
-#### 3. The Control Center (The Logic)
-How does the city "think" about this information?
-*Example: If the trash height is more than 80%, send a signal to the garbage department.*
-
-#### 4. The Response (What happens next?)
-What is the **Controller** that changes the city?
-*Example: A digital map in the garbage truck updates to show a "High Priority" pickup.*
-
----
-
-## Workflow: Document-Driven Development with AI
-
-**This is how you work with any AI model (including GitHub Copilot, ChatGPT, Claude, etc.). The approach works regardless of which model your school uses.**
-
-### Phase 1: Clarify Your Idea with AI (No Code Yet)
-
-#### Copy this prompt into your AI chat:
-
-```
-I want to build a simulated city based on this outline. 
-Please help me clarify it before I code.
-
-[Paste your Project Template filled in above]
-
-Please:
-1. Rewrite the 4 components using clear, technical language
-2. Identify the MQTT topics each agent will publish/subscribe to
-3. List any configuration parameters (MQTT broker, locations, thresholds)
-4. Point out any ambiguities or missing details
-
-Do NOT write any code. Just clarify the design.
-```
-
-#### Review the AI's response
-- Does it capture your idea correctly?
-- Are the agents clearly separated?
-- Are the MQTT topics clear?
-- If not, refine and ask again
-
----
-
-### Phase 2: Get an Implementation Plan (Still No Code)
-
-#### Once you agree on the design, use this prompt:
-
-```
-Based on the design we just clarified:
-
-[Paste the clarified design from Phase 1]
-
-Please propose a phased implementation plan:
-- Phase 1: Single basic agent (smallest working notebook)
-- Phase 2: Add configuration file
-- Phase 3: Add MQTT publishing
-- Phase 4: Add second agent with MQTT subscription
-- Phase 5: Add dashboard visualization
-
-For each phase:
-1. List what new notebook files will be created
-2. List what tests/verifications I should run
-3. Say exactly what I should investigate/understand before moving to the next phase
-
-Do NOT write code yet. Just show the phases.
-```
-
-#### Review and approve the plan
-- Does each phase test one new thing?
-- Can you run and understand each phase?
-- Are there gaps?
-- Ask AI to adjust if needed
-
----
-
-### Phase 3: Implement ONE Phase at a Time
-
-#### For the FIRST phase only, use this prompt:
-
-```
-Implement ONLY Phase 1 from the plan above:
-[Paste Phase 1 description]
-
-Remember these rules (from .github/copilot-instructions.md):
-- Use anymap-ts for mapping (NOT folium)
-- Each notebook is ONE agent (NOT monolithic)
-- Load config via simulated_city.config.load_config()
-- Use mqtt.publish_json_checked() for publishing
-- Add all dependencies to pyproject.toml (NOT !pip install in notebooks)
-
-Only implement Phase 1. Do NOT jump ahead to Phase 2.
-Include comments explaining each section.
-```
-
-#### After you get the code:
-```bash
-python scripts/verify_setup.py      # Check dependencies
-python -m pytest                     # Run tests
-python -m jupyterlab                # Open the notebook and RUN IT
-```
-
-#### Investigate before moving forward
-- Does the notebook actually run without errors?
-- Can you explain what each cell does?
-- Does it match the design from Phase 1?
-- If something is wrong, ask AI to fix it before moving to Phase 2
-
----
-
-### Phase 4: Move to the Next Phase
-
-Once Phase 1 works, use this prompt:
-
-```
-Good! Phase 1 works. Now implement ONLY Phase 2:
-[Paste Phase 2 description]
-
-The Phase 1 notebooks/code are:
-[List what was created in Phase 1]
-
-Implement only Phase 2. Do NOT modify Phase 1 code unless necessary.
-```
-
-**Repeat this cycle for each phase.**
-
----
-
-## Key Rules to Remember
-
-✅ **DO** enforce these in every AI prompt:
-1. Two separate MQTT topics are better than one shared variable
-2. Each agent notebook is independent and can restart anytime
-3. Configuration comes from `config.yaml`, not hardcoded values
-4. All dependencies go in `pyproject.toml` first, then `pip install -e ".[notebooks]"`
-5. Dependencies must be approved: `anymap-ts` ✅, `folium` ❌
-
-❌ **DO NOT** let AI:
-- Skip the documentation/planning phases
-- Create one giant notebook with all logic
-- Jump to implementation without a clear, approved design
-- Install packages inside notebooks with `!pip install`
-- Use `folium`, `matplotlib`, or `plotly` for real-time maps
-
----
-
-## If the AI Skips Steps
-
-If you ask for implementation and the AI writes code without clarifying the design first, respond with:
-
-> "No code yet. I need to clarify the design first. Please rewrite my outline using the Phase 1 prompt above, then we'll get a plan before any implementation."
-
-If the AI proposes all 5 phases at once instead of letting you implement one at a time:
-
-> "I need only Phase 1 implementation. We'll do the other phases after I test Phase 1. Just give me Phase 1 code."
-
-If the AI installs `folium` or uses `!pip install`:
-
-> "No, use anymap-ts and add dependencies to pyproject.toml. Also, re-read .github/copilot-instructions.md for the full list of rules."
-
----
-
-## Testing Your Work
-
-After each phase, run:
-
-```bash
-# Check environment
-python scripts/verify_setup.py
-
-# Run existing tests
-python -m pytest
-
-# Try your new notebook
-python -m jupyterlab
-# Open the notebook and run all cells
-```
-
-Before submitting a pull request, include this in your description:
-
-```
-Docs updated: yes/no
-Phases completed: [e.g., "Phase 1 and Phase 2"]
-Tests passing: yes/no
-```
+### Scenario: Nightlife in Kødbyen, Copenhagen
+
+The simulation models 200 people across 4 bars.
+
+- People are split into 4 bar groups.
+- Each person has a color: red, blue, green, orange, or purple.
+- A color represents people who have already seen each other on a dating app.
+
+People move around each bar and start conversations when they are within a 1 meter radius of each other.
+If two people with the same color talk for more than 10 seconds, they leave the bar together and are removed from the map after walking outside of the bar for 20 seconds.
+
+### Simulation Components
+
+#### 1) Trigger (Agents + Environment)
+- Agents: people moving between and within bars
+- Environment: nightlife setting with time-based events
+
+#### 2) Observer (Sensors)
+- Each bar has a sensor that confirms a match only when two people have the same color and talk continuously for more than 10 seconds.
+
+#### 3) Control Center (Logic)
+- Rule: only sensor-confirmed matches are processed, where match confirmation requires same color and more than 10 continuous seconds of conversation.
+
+#### 4) Response (Controller)
+- Matched pairs leave the bar and disappear from the simulation map
+- Every 50 seconds, 25% of all agents switch bars, and destinations are chosen to keep bars almost equal.
+
+### Design Clarification (Before Coding)
+
+This section formalizes the current scenario in technical language without implementation details.
+
+#### 1) Four Components in Technical Language
+
+- Trigger (agents and environment):
+	- 200 person-agents move within four bar zones.
+	- A periodic redistribution event moves a subset of eligible agents between bars.
+- Observer (sensing layer):
+	- Bar-level sensing tracks proximity interactions and continuous interaction duration.
+	- Same-color pair interactions are monitored against the match threshold.
+- Control (decision logic):
+	- The control layer processes only sensor-confirmed matches, where confirmation requires same color and more than 10 continuous seconds of conversation.
+	- Eligibility rules determine whether agents can match, switch bars, or exit.
+- Response (actuation):
+	- Confirmed pairs transition to exit behavior and are removed after the exit duration.
+	- At each redistribution interval, eligible agents are reassigned to new bars.
+
+#### 2) MQTT Topic Map by Agent (Publish / Subscribe)
+
+- Bar agent (one per bar):
+	- Publish: `city/agents/state`, `city/events/conversation`
+	- Subscribe: `city/control/switch`, `city/control/match_confirmed`
+- Match logic agent:
+	- Publish: `city/events/match`, `city/control/match_confirmed`
+	- Subscribe: `city/events/conversation`, `city/agents/state`
+- Mobility or switch agent:
+	- Publish: `city/control/switch`, `city/events/switch`
+	- Subscribe: `city/agents/state`
+- Dashboard agent:
+	- Publish: optional KPI topic only
+	- Subscribe: `city/agents/state`, `city/events/match`, `city/events/switch`
+
+#### 3) Configuration Parameters to Define
+
+- MQTT broker and client settings:
+	- Host, port, TLS enabled/disabled, credentials via environment variables, base topic, QoS, retain policy, reconnect policy
+- Geography and map settings:
+	- Bar polygons or centers, exit points, coordinate reference system, map center and zoom
+- Population settings:
+	- Total people, color distribution, initial per-bar allocation, max matches per person
+- Behavior thresholds:
+	- Interaction radius, match duration threshold, conversation timeout, exit duration, switch interval, switch fraction
+- Time and reproducibility:
+	- Tick interval, total simulation duration, random seed
+- Data quality and validation:
+	- Message freshness limit, duplicate handling policy, malformed payload policy
+- Metrics:
+	- Total matches, matches per minute, active population over time, matches per bar
+
+#### 4) Ambiguities and Assumptions to Resolve
+
+- No major unresolved ambiguities remain for core behavior.
+- Optional refinements can be added later (payload schema details and KPI reporting format).
+
+#### 5) Realistic Starting Values (v1)
+
+- Population:
+	- 200 total people, 50 per bar initially
+	- Balanced colors: 40 people per color
+- Time:
+	- Tick interval: 1 second
+	- Simulation duration: 900 seconds (15 minutes)
+	- Match threshold: 10 continuous seconds
+	- Conversation timeout: 20 seconds
+	- Exit duration: 20 seconds
+	- Switch interval: every 50 seconds
+- Movement:
+	- Speed range: 0.8 to 1.2 m/s
+	- Interaction radius: 1 meter
+- Switching:
+	- 25% of all agents switch bars per interval
+	- Destination selected to keep bar populations almost equal (within tolerance)
+- Reliability:
+	- Ignore state messages older than 5 seconds
+	- For `city/events/match`: ignore duplicate `match_id` events and ignore events older than 5 seconds
+	- Keep the first valid match event as final (no overwrite)
+	- Use deterministic seed 42 for repeatable runs
+- Success target:
+	- At least 3 matches per minute
+
+#### Resolved Clarification Decisions
+
+- One person cannot match more than once in a single simulation run.
+- All agents are allowed to switch bars.
+- If multiple same-color candidates are nearby, partner selection is random at first contact, then locked.
+- Initial bar populations should stay almost equal.
+- The dashboard is read-only.
+- A conversation starts when two people are within a 1 meter radius of each other.
+- Sensors can confirm matches when same-color pairs talk continuously for more than 10 seconds.
+- A match is valid only if both conditions are true: same color and more than 10 continuous seconds of conversation.
+- "Outside the bar" is defined as crossing the bar boundary line.
+- Success target: at least 3 matches per minute.
+- Duplicate or late match events are ignored, and the first valid match event is final.
+
+#### Finalized Design Decisions
+
+Use this section as the finalized reference for implementation behavior.
+
+- Conversation end condition: talking stops when people are more than 1 meter away from each other. Conversation lasts between 2 and 20 seconds.
+- Pair locking timing: if multiple candidates are in range, one is selected randomly at first contact and the pair stays locked until conversation ends.
+- Bar-balance tolerance: max difference between bars is 5 people.
+- Switch destination policy: destination is selected to keep bar populations almost equal.
+- Match authority policy: final match confirmation comes from sensor only when same-color pairs talk continuously for more than 10 seconds.
+- KPI window definition: "3 matches per minute" is measured as total matches / total runtime
+- Duplicate or late match events: ignore events older than 5 seconds, ignore duplicate `match_id`, and keep the first valid match as final.
+- MQTT payload fields are finalized ✅:
+	- `city/agents/state`: `event_id`, `person_id`, `bar_id`, `color`, `state`, `x`, `y`, `timestamp`
+	- `city/events/conversation`: `event_id`, `conversation_id`, `person_a_id`, `person_b_id`, `bar_id`, `duration_seconds`, `distance_m`, `timestamp`
+	- `city/events/match`: `match_id`, `person_a_id`, `person_b_id`, `color`, `bar_id`, `duration_seconds`, `confirmed_by`, `timestamp`
+	- `city/events/switch`: `event_id`, `person_id`, `from_bar_id`, `to_bar_id`, `reason`, `timestamp`
