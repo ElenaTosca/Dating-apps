@@ -178,12 +178,25 @@ if _MapLibreMap is not None:  # pragma: no cover
 			self._move_marker_supported: Optional[bool] = None
 			self._move_marker_ack_count: int = 0
 			self._marker_style: Dict[str, Dict[str, Optional[str]]] = {}
+			self._max_pending_js_calls: int = 2000
+			self._trim_pending_js_calls_to: int = 400
 
 			def _on_ack(_data):
 				self._move_marker_supported = True
 				self._move_marker_ack_count += 1
 
 			self.on_map_event("anymap:moveMarkerAck", _on_ack)
+
+		def _apply_js_backpressure(self) -> bool:
+			pending = getattr(self, "_js_calls", None)
+			if not isinstance(pending, list):
+				return False
+
+			if len(pending) <= self._max_pending_js_calls:
+				return False
+
+			self._js_calls = pending[-self._trim_pending_js_calls_to :]
+			return True
 
 		def move_marker(
 			self,
@@ -202,6 +215,11 @@ if _MapLibreMap is not None:  # pragma: no cover
 			if popup is not None:
 				style["popup"] = popup
 			self._marker_style[marker_id] = style
+
+			# If frontend comm falls behind, queued JS calls can grow very large
+			# and consume excessive memory in notebook kernels.
+			if self._apply_js_backpressure():
+				return
 
 			kwargs = {"id": marker_id}
 			if style.get("color") is not None:
