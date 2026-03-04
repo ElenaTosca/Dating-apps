@@ -28,6 +28,7 @@ python -m pip install -U pip
 python -m pip install -e ".[dev, geo, notebooks]"
 ```
 
+
 Windows (PowerShell):
 
 ```powershell

@@ -2,6 +2,14 @@
 
 This guide shows how to build a multi-agent simulation using separate MQTT-communicating notebooks.
 
+## Profile-Match Scenario Decisions
+
+When implementing the profile-based dating simulation, use these fixed decisions:
+
+- Final match decisions are made by `agent_match_logic.ipynb` (central authority).
+- Total population is fixed at 50 agents globally across 4 bars.
+- If multiple candidates satisfy matching conditions at the same moment, choose the first valid candidate.
+
 ## Principle: Many Small Notebooks, Not One Big File
 
 Each agent or component is a **separate notebook** that:

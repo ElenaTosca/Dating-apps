@@ -7,6 +7,15 @@ This document covers everything in `simulated_city.mqtt`:
 - `MqttConnector`
 - `MqttPublisher`
 
+## Profile-Match Architecture Notes
+
+For the profile-based matching scenario in this workshop:
+
+- Match authority is centralized in `notebooks/agent_match_logic.ipynb`.
+- Simulation population is fixed at 50 agents globally across 4 bars.
+- If multiple candidates are valid at the same moment, first valid candidate is selected.
+- Bar notebooks publish candidate/state events; `agent_match_logic` publishes definitive match events.
+
 ## Quick Start: Using Multiple Brokers
 
 The configuration supports routing different messages to different brokers:

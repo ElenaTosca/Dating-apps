@@ -1,14 +1,14 @@
 
 ### Scenario: Nightlife in Kødbyen, Copenhagen
 
-The simulation models 200 people across 4 bars.
+The simulation models 50 people across 4 bars.
 
 - People are split into 4 bar groups.
-- Each person has a color: red, blue, green, orange, or purple.
-- A color represents people who have already seen each other on a dating app.
+- Each person has profile attributes (including integer height and ordered hair-color index).
+- Matching is decided centrally by the `agent_match_logic` notebook using profile-based rules.
 
 People move around each bar and start conversations when they are within a 1 meter radius of each other.
-If two people with the same color talk for more than 10 seconds, they leave the bar together and are removed from the map after walking outside of the bar for 20 seconds.
+If two people satisfy the profile match rules and are confirmed by `agent_match_logic`, they leave the bar together and are removed from the map after walking outside of the bar boundary.
 
 ### Simulation Components
 
@@ -17,10 +17,11 @@ If two people with the same color talk for more than 10 seconds, they leave the 
 - Environment: nightlife setting with time-based events
 
 #### 2) Observer (Sensors)
-- Each bar has a sensor that confirms a match only when two people have the same color and talk continuously for more than 10 seconds.
+- Each bar senses proximity and conversation continuity, then publishes candidate events for centralized match evaluation.
 
 #### 3) Control Center (Logic)
-- Rule: only sensor-confirmed matches are processed, where match confirmation requires same color and more than 10 continuous seconds of conversation.
+- Rule: final match authority is centralized in `agent_match_logic`, which applies profile matching rules.
+- If multiple candidates are valid at the same moment, first valid candidate is selected.
 
 #### 4) Response (Controller)
 - Matched pairs leave the bar and disappear from the simulation map
@@ -33,13 +34,14 @@ This section formalizes the current scenario in technical language without imple
 #### 1) Four Components in Technical Language
 
 - Trigger (agents and environment):
-	- 200 person-agents move within four bar zones.
+	- 50 person-agents move within four bar zones.
 	- A periodic redistribution event moves a subset of eligible agents between bars.
 - Observer (sensing layer):
 	- Bar-level sensing tracks proximity interactions and continuous interaction duration.
-	- Same-color pair interactions are monitored against the match threshold.
+	- Candidate pair interactions are published with profile fields (height and hair index).
 - Control (decision logic):
-	- The control layer processes only sensor-confirmed matches, where confirmation requires same color and more than 10 continuous seconds of conversation.
+	- The control layer (`agent_match_logic`) applies profile rules: height gate plus hair-condition probability.
+	- If multiple candidates are valid at the same moment, first valid candidate is selected.
 	- Eligibility rules determine whether agents can match, switch bars, or exit.
 - Response (actuation):
 	- Confirmed pairs transition to exit behavior and are removed after the exit duration.
@@ -85,8 +87,8 @@ This section formalizes the current scenario in technical language without imple
 #### 5) Realistic Starting Values (v1)
 
 - Population:
-	- 200 total people, 50 per bar initially
-	- Balanced colors: 40 people per color
+	- 50 total people across 4 bars
+	- Each person has unique integer height and unique ordered hair-color index
 - Time:
 	- Tick interval: 1 second
 	- Simulation duration: 900 seconds (15 minutes)
@@ -112,12 +114,11 @@ This section formalizes the current scenario in technical language without imple
 
 - One person cannot match more than once in a single simulation run.
 - All agents are allowed to switch bars.
-- If multiple same-color candidates are nearby, partner selection is random at first contact, then locked.
+- If multiple candidates are valid at the same moment, first valid candidate is selected.
 - Initial bar populations should stay almost equal.
 - The dashboard is read-only.
 - A conversation starts when two people are within a 1 meter radius of each other.
-- Sensors can confirm matches when same-color pairs talk continuously for more than 10 seconds.
-- A match is valid only if both conditions are true: same color and more than 10 continuous seconds of conversation.
+- `agent_match_logic` confirms matches when both profile conditions are met (height and hair rule).
 - "Outside the bar" is defined as crossing the bar boundary line.
 - Success target: at least 3 matches per minute.
 - Duplicate or late match events are ignored, and the first valid match event is final.
@@ -127,10 +128,12 @@ This section formalizes the current scenario in technical language without imple
 Use this section as the finalized reference for implementation behavior.
 
 - Conversation end condition: talking stops when people are more than 1 meter away from each other. Conversation lasts between 2 and 20 seconds.
-- Pair locking timing: if multiple candidates are in range, one is selected randomly at first contact and the pair stays locked until conversation ends.
+- Pair locking timing: if multiple candidates are valid at the same moment, first valid candidate is selected and locked.
 - Bar-balance tolerance: max difference between bars is 5 people.
 - Switch destination policy: destination is selected to keep bar populations almost equal.
-- Match authority policy: final match confirmation comes from sensor only when same-color pairs talk continuously for more than 10 seconds.
+- Match authority policy: final match confirmation comes from `agent_match_logic` based on profile matching rules.
+- Population scope policy: simulation size is fixed at 50 agents globally across 4 bars.
+- Tie behavior policy: if multiple candidates are valid at the same moment, select the first valid candidate.
 - KPI window definition: "3 matches per minute" is measured as total matches / total runtime
 - Duplicate or late match events: ignore events older than 5 seconds, ignore duplicate `match_id`, and keep the first valid match as final.
 - MQTT payload fields are finalized ✅:

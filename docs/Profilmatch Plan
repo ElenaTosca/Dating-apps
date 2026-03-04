@@ -1,0 +1,135 @@
+### Simulation Component: Profile-Based Matching
+
+This component defines how agents receive profile attributes and how those
+attributes affect matching.
+
+## 1) Agent profile attributes
+
+For a simulation with 50 agents, each agent has:
+
+- A unique integer `height_cm` value in the range 150 to 200 (no duplicate heights).
+- A unique `hair_color_index` on an ordered scale from platinum blond to black.
+
+### Hair color representation
+
+Use an ordered integer scale so distance is well-defined:
+
+- `hair_color_index` is an integer in `[0, 49]`.
+- `0` represents the lightest/platinum-blond end.
+- `49` represents the darkest/black end.
+
+## 2) Matching rules
+
+All rules below must be applied in this order.
+
+A pair can match only if both conditions are satisfied: the height gate and a valid hair-color condition.
+
+1. Height gate (required):
+	 - Two agents are eligible only if:
+		 - `abs(height_cm_a - height_cm_b) <= 10`
+
+2. Hair-color condition (probabilistic):
+	 - Let `d = abs(hair_color_index_a - hair_color_index_b)`.
+	 - If `d == 0` (same hair color), match probability is `1/3`.
+	 - If `d == 10`, match probability is `2/3`.
+	 - Otherwise, match probability is `0`.
+
+## 3) Notes for implementation
+
+- The `1/3` and `2/3` values are probabilities per candidate pair,
+	not target fractions of the full population.
+- If needed for reproducibility, use a fixed random seed before evaluating
+	probabilistic matches.
+- The simulation size is fixed at 50 agents.
+- If multiple candidate partners satisfy all match conditions at the same moment,
+	select the first valid candidate (first tie behavior).
+
+
+## 4) Implementation plan
+
+### Phase 1 — Documentation alignment
+
+1. Keep this file as the source of truth for profile matching rules.
+2. Update high-level docs to match this behavior:
+	- `README.md`
+	- `docs/mqtt.md`
+	- `docs/exercises.md`
+	- `docs/config.md`
+3. Ensure docs explicitly state:
+	- Match authority is in `agent_match_logic.ipynb`.
+	- Simulation uses 50 agents globally across 4 bars.
+	- Tie behavior is first valid candidate.
+
+### Phase 2 — Configuration updates
+
+1. Add/confirm config keys in `config.yaml`:
+	- `agent_count_total: 50`
+	- `bar_ids: [bar_1, bar_2, bar_3, bar_4]`
+	- `height_min_cm: 150`
+	- `height_max_cm: 200`
+	- `hair_index_min: 0`
+	- `hair_index_max: 49`
+	- `height_tolerance_cm: 10`
+	- `hair_distance_exact: 10`
+	- `match_prob_same_hair: 0.3333333333`
+	- `match_prob_distance_10: 0.6666666667`
+	- `match_random_seed` (for reproducibility)
+2. Keep loading through `simulated_city.config.load_config()`.
+
+### Phase 3 — Bar agents publish profile-aware state and candidate events
+
+1. In each bar agent notebook:
+	- Add `height_cm` and `hair_color_index` to person data.
+	- Keep movement and conversation detection.
+	- Stop making final match decisions locally.
+2. Publish state with profile fields on MQTT.
+3. Publish conversation/candidate events that include:
+	- `person_a_id`, `person_b_id`
+	- `height_cm_a`, `height_cm_b`
+	- `hair_color_index_a`, `hair_color_index_b`
+	- `bar_id`, `timestamp`
+4. Build `agent_bar_2.ipynb`, `agent_bar_3.ipynb`, and `agent_bar_4.ipynb` from the same pattern as `agent_bar_1.ipynb`.
+
+### Phase 4 — Centralized matching in agent_match_logic
+
+1. Subscribe to candidate/conversation topics from all bars.
+2. For each candidate pair, apply rules in order:
+	- Height gate: `abs(height_a - height_b) <= 10`
+	- Hair rule with `d = abs(hair_a - hair_b)`:
+		- `d == 0` → probability `1/3`
+		- `d == 10` → probability `2/3`
+		- otherwise → no match
+3. Evaluate probability once per newly eligible pair (not every tick).
+4. Apply first-candidate tie behavior when multiple candidates exist at once.
+5. Publish definitive match events on the match topic.
+
+### Phase 5 — Bar-agent match application and exits
+
+1. Each bar agent subscribes to match events.
+2. When a local person is included in a match event:
+	- set state to matched,
+	- start exit movement to nearest boundary,
+	- remove after crossing the boundary.
+
+### Phase 6 — Dashboard updates
+
+1. Keep dashboard read-only.
+2. Continue state-based colors:
+	- idle = blue
+	- talking = yellow
+	- matched = green
+3. Optionally include `height_cm` and `hair_color_index` in marker popups.
+
+### Phase 7 — Verification
+
+1. Run:
+	- `python scripts/verify_setup.py`
+	- `python scripts/validate_structure.py`
+	- `python -m pytest`
+2. Manual notebook run order:
+	1) bar agents (1–4), 2) `agent_match_logic.ipynb`, 3) `dashboard.ipynb`.
+3. Validate outcomes:
+	- 50 unique integer heights and 50 unique hair indices globally,
+	- no matches unless both height and hair rules allow it,
+	- probabilities applied once per new eligible pair,
+	- matched agents exit and disappear after crossing the boundary.
