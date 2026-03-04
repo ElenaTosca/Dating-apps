@@ -7,6 +7,14 @@ This module loads workshop configuration from:
 
 It returns a single `AppConfig` object that contains `MqttConfig`.
 
+## Profile-Match Configuration Notes
+
+For the profile-based matching scenario, keep these behavior decisions aligned with docs:
+
+- Fixed global population: 50 agents across 4 bars.
+- Central match authority: `agent_match_logic.ipynb` consumes candidate events and publishes final matches.
+- Tie behavior: if multiple candidates are valid at once, select the first valid candidate.
+
 
 ## Install
 
