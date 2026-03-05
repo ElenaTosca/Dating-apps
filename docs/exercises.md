@@ -9,6 +9,10 @@ When implementing the profile-based dating simulation, use these fixed decisions
 - Final match decisions are made by `agent_match_logic.ipynb` (central authority).
 - Total population is fixed at 50 agents globally across 4 bars.
 - If multiple candidates satisfy matching conditions at the same moment, choose the first valid candidate.
+- A pair is eligible when either height rule or hair rule matches (OR logic), not only when both match.
+- When a match is applied in bar agents, both matched partners leave together using the same exit direction.
+- A pair is eligible for matching only after they have been talking for at least 5 seconds.
+- Match events include `match_basis` (`hair`, `height`, or `both`), and the dashboard popup shows this reason for matched agents.
 
 ## Principle: Many Small Notebooks, Not One Big File
 
