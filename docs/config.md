@@ -15,6 +15,24 @@ For the profile-based matching scenario, keep these behavior decisions aligned w
 - Central match authority: `agent_match_logic.ipynb` consumes candidate events and publishes final matches.
 - Tie behavior: if multiple candidates are valid at once, select the first valid candidate.
 
+### Recommended `dating_simulation` keys in `config.yaml`
+
+Use these keys for the profile-based matching phases:
+
+- `agent_count_total: 50`
+- `bar_ids: ["bar_1", "bar_2", "bar_3", "bar_4"]`
+- `height_min_cm: 150`
+- `height_max_cm: 200`
+- `hair_index_min: 0`
+- `hair_index_max: 49`
+- `height_tolerance_cm: 10`
+- `hair_distance_exact: 10`
+- `match_prob_same_hair: 0.3333333333`
+- `match_prob_distance_10: 0.6666666667`
+- `match_random_seed: 42`
+
+These are read from `config.yaml` while the app still uses `simulated_city.config.load_config()` for the main config flow.
+
 
 ## Install
 
