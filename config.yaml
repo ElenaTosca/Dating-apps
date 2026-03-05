@@ -59,8 +59,21 @@ dating_simulation:
   random_seed: 42
   bar_size_m: 20.0
   people_count: 50
+  agent_count_total: 50
   bar_ids: ["bar_1", "bar_2", "bar_3", "bar_4"]
   colors: ["red", "blue", "green", "orange", "purple"]
+
+  # Profile-based matching (Phase 2)
+  height_min_cm: 150
+  height_max_cm: 200
+  hair_index_min: 0
+  hair_index_max: 49
+  height_tolerance_cm: 10
+  hair_distance_exact: 10
+  match_prob_same_hair: 0.3333333333
+  match_prob_distance_10: 0.6666666667
+  match_random_seed: 42
+
   conversation_radius_m: 1.0
   walk_step_max_m: 0.3
   match_seconds: 10
